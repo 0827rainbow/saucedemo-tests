@@ -1,11 +1,14 @@
 import pytest
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 @pytest.fixture
 def driver():
+    #自动下载
+    service = Service(EdgeChromiumDriverManager().install())
     # 手动指定 EdgeDriver 路径
-    service = Service(executable_path="E:\\TestSturdy\\saucedemo_tests\\drivers\\msedgedriver.exe")
+    #service = Service(executable_path="E:\\TestSturdy\\saucedemo_tests\\drivers\\msedgedriver.exe")
     driver = webdriver.Edge(service=service)
     driver.maximize_window()
     yield driver
