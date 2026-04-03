@@ -1,37 +1,20 @@
 name: Run Tests
-
 on: [push, pull_request]
-
 jobs:
   test:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
-
-      - name: Install Chrome
-        run: |
-          choco install googlechrome -y
-        # windows-latest 通常已预装 Chrome，但为了确保版本最新，可以显式安装
-
-      - name: Setup ChromeDriver
-        uses: nanasess/setup-chromedriver@v2
-        with:
-          chromedriver-version: ' '  # 可以指定版本，或者留空自动匹配
-          # 如果不指定版本，会自动匹配当前 Chrome 版本
-
       - name: Install dependencies
         run: |
-          pip install pytest selenium allure-pytest
-
+          pip install pytest selenium webdriver-manager allure-pytest
       - name: Run tests
         run: |
           pytest tests/ --alluredir=allure-results
-
       - name: Upload Allure results
         uses: actions/upload-artifact@v4
         with:
