@@ -1,18 +1,52 @@
+import os
+import time
+import logging
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
+# 创建截图和日志目录
+SCREENSHOT_DIR = "screenshots"
+LOG_DIR = "logs"
+os.makedirs(SCREENSHOT_DIR, exist_ok=True)
+os.makedirs(LOG_DIR, exist_ok=True)
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(os.path.join(LOG_DIR, "test.log")),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+def take_screenshot(driver, test_name):
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    filename = f"{test_name}_{timestamp}.png"
+    filepath = os.path.join(SCREENSHOT_DIR, filename)
+    driver.save_screenshot(filepath)
+    logger.error(f"Screenshot saved: {filepath}")
 
 @pytest.fixture
 def driver():
     options = Options()
     options.add_argument('--disable-extensions')
     options.add_argument('--incognito')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(options=options)
     driver.maximize_window()
+    logger.info("Browser started")
     yield driver
     driver.quit()
-    '''yield 使得该函数成为一个生成器。
-    当作为 pytest fixture 使用时，yield 之前的代码属于 setup 阶段（启动浏览器），
-    yield 返回的 driver 对象会传递给测试函数；测试执行完毕后，会继续执行 yield 之后的代码。'''
+    logger.info("Browser closed")
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+    if report.when == "call" and report.failed:
+        driver = item.funcargs.get('driver')
+        if driver:
+            take_screenshot(driver, item.name)
+            logger.error(f"Test '{item.name}' failed.")
