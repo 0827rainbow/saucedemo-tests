@@ -1,7 +1,5 @@
 name: Run Tests
-
 on: [push, pull_request]
-
 jobs:
   test:
     runs-on: windows-latest
@@ -13,13 +11,7 @@ jobs:
           python-version: '3.14'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pytest selenium allure-pytest
-          # 注意：不再需要 webdriver-manager，因为我们会单独安装 EdgeDriver
-      - name: Setup Edge Driver
-        uses: browser-actions/setup-edge-driver@v1
-        with:
-          edge-version: ''   # 指定你的 Edge 主版本号，或留空自动匹配
+          pip install pytest selenium webdriver-manager allure-pytest
       - name: Run tests
         run: |
           pytest tests/ --alluredir=allure-results

@@ -1,22 +1,15 @@
-
-import os
 import pytest
 from selenium import webdriver
-from selenium.webdriver.edge.service import Service
-
+from selenium.webdriver.chrome.options import Options
 
 @pytest.fixture
 def driver():
-    # 判断是否在 CI 环境中运行（GitHub Actions 会自动设置 CI=true）
-    if os.getenv('CI'):
-        # CI 环境中，EdgeDriver 已经在 PATH 里，直接创建驱动
-        driver = webdriver.Edge()
-    else:
-        # 本地开发：使用 webdriver-manager 自动下载匹配的驱动
-        from webdriver_manager.microsoft import EdgeChromiumDriverManager
-        service = Service(EdgeChromiumDriverManager().install())
-        driver = webdriver.Edge(service=service)
-
+    options = Options()
+    options.add_argument('--disable-extensions')
+    options.add_argument('--incognito')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    driver = webdriver.Chrome(options=options)
     driver.maximize_window()
     yield driver
     driver.quit()

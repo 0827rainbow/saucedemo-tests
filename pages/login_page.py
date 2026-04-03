@@ -22,10 +22,13 @@ class LoginPage:
         self.driver.get(self.url)
 
     def login(self, username: str, password: str):
+        # 等待用户名输入框可见（最多10秒）
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.USERNAME_INPUT)
+        )
         self.driver.find_element(*self.USERNAME_INPUT).send_keys(username)
         self.driver.find_element(*self.PASSWORD_INPUT).send_keys(password)
         self.driver.find_element(*self.LOGIN_BUTTON).click()
-
     # EC是 expected_conditions模块的常见别名，提供预定义的条件。
     # visibility_of_element_located条件：等待元素在DOM中出现并且可见（宽高 > 0，且未隐藏）。
     def get_error_message(self) -> str:
